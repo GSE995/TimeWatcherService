@@ -1,39 +1,47 @@
 import {Request, Response, Express} from 'express'
 import logger from '../config/logger'
 import TimersServie from '../services/TimerService'
-import { PageSize } from '../models'
+import { PageSize, Timer } from '../models'
+import ListResult from '../models/ListResult'
 
 export default (app: Express) : void => {
 
     app.route('/api/v1/timer/')
         .post(async (req: Request, res: Response) => {
-            try {   
-                let timer = req.body
-                let result = TimersServie.save(timer)
-                res.send(result)
-            } catch (error) {
-                logger.error(error)
-            }
-            res.status(500).send()
+            let timer = req.body
+            let result = await TimersServie.save(timer)
+            result
+                .ifSuccess((data: Timer) => {
+                    res.send(data)
+                })
+                .ifFailure((message: string) => {
+                    logger.error(message)
+                    res.status(500).send(message)
+                })
         })
         .delete(async (req: Request, res: Response) => {
-            try {
-                let result = await TimersServie.remove(req.query.id)
-                res.send(result)
-            } catch (error) {
-                logger.error(error)
-            }
-            res.status(500)
+            let result = await TimersServie.remove(req.query.id)
+            result
+                .ifSuccess(() => {
+                    res.send()
+                })
+                .ifFailure((message: string) => {
+                    logger.error(message)
+                    res.status(500).send(message)
+                })
         })
     app.route('/api/v1/timer/list')
         .get(async (req: Request, res: Response) => {
-            try {   
-                let {pageParams} = req.body
-                let result = TimersServie.getList(new PageSize(pageParams.start, pageParams.limit))
-                res.send(result)
-            } catch (error) {
-                logger.error(error)
-            }
-            res.status(500).send()
+            let qery = req.query
+            let result = await TimersServie.getList(new PageSize(qery.start, qery.limit))
+
+            result
+                .ifSuccess((data: ListResult<Timer>) => {
+                    res.send(data)
+                })
+                .ifFailure((message: string) => {
+                    logger.error(message)
+                    res.status(500).send(message)
+                })
         })
 }
