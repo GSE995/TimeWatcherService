@@ -1,5 +1,5 @@
 import Timer from '../models/Timer'
-import {Result, SuccessResult, ErrorResult} from '../models/Result'
+import {SuccessResult, ErrorResult} from '../models/Result'
 import ListResult from '../models/ListResult'
 import PageSize from '../models/PageSize'
 import firebase from '../config/firebase'
@@ -64,7 +64,7 @@ export default class TimersServie<T> {
                 let data = doc.data()
                 let timer = new Timer(data.name)
                 timer.id = doc.id
-                timer.startDate = data.startDate.toDate()
+                timer.startDate = data.startDate ? data.startDate.toDate() : null
                 timer.endDate = data.endDate ? data.endDate.toDate() : null
                 timers.push(timer)
             })
