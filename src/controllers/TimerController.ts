@@ -6,10 +6,22 @@ import ListResult from '../models/ListResult'
 
 export default (app: Express) : void => {
 
-    app.route('/api/v1/timer/')
-        .post(async (req: Request, res: Response) => {
+    app.route('/api/v1/timer/:id')
+        .put(async (req: Request, res: Response) => {
             let timer = req.body
             let result = await TimersServie.save(timer)
+            result
+                .ifSuccess((data: Timer) => {
+                    res.send(data)
+                })
+                .ifFailure((message: string) => {
+                    logger.error(message)
+                    res.status(500).send(message)
+                })
+        })
+        .post(async (req: Request, res: Response) => {
+            let timer = req.body
+            let result = await TimersServie.create(timer)
             result
                 .ifSuccess((data: Timer) => {
                     res.send(data)
